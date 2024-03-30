@@ -70,9 +70,9 @@ class CustomUserViewSet(UserViewSet):
         return super().get_permissions()
 
     @action(
-            detail=True,
-            methods=['post', 'delete'],
-            permission_classes=(IsAuthenticated,)
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=(IsAuthenticated,)
     )
     def subscribe(self, request, **kwargs):
         user = request.user
@@ -98,8 +98,8 @@ class CustomUserViewSet(UserViewSet):
         return Response(status=HTTP_204_NO_CONTENT)
 
     @action(
-            detail=False,
-            permission_classes=(IsAuthenticated,)
+        detail=False,
+        permission_classes=(IsAuthenticated,)
     )
     def subscriptions(self, request):
         user = request.user
@@ -160,9 +160,9 @@ class RecipesViewSet(viewsets.ModelViewSet):
         )
 
     @action(
-            detail=True,
-            methods=['post', 'delete'],
-            permission_classes=(IsAuthenticated,)
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=(IsAuthenticated,)
     )
     def favorite(self, request, pk):
         if request.method == 'POST':
@@ -170,9 +170,9 @@ class RecipesViewSet(viewsets.ModelViewSet):
         return self.delete_recipe(Favorites, request.user, pk)
 
     @action(
-            detail=True,
-            methods=['post', 'delete'],
-            permission_classes=(IsAuthenticated,)
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=(IsAuthenticated,)
     )
     def shopping_cart(self, request, pk):
         if request.method == 'POST':
@@ -180,9 +180,9 @@ class RecipesViewSet(viewsets.ModelViewSet):
         return self.delete_recipe(Carts, request.user, pk)
 
     @action(
-            methods=['get'],
-            detail=False,
-            permission_classes=(IsAuthenticated,)
+        methods=['get'],
+        detail=False,
+        permission_classes=(IsAuthenticated,)
     )
     def download_shopping_cart(self, request):
         ingredients = IngredientsRecipes.objects.filter(
