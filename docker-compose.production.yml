@@ -7,7 +7,7 @@ volumes:
   media:
 
 services:
-  foodgram_db:
+  db:
     image: postgres:13
     env_file: .env
     volumes:
@@ -16,26 +16,22 @@ services:
     image: zinvas/foodgram_backend
     env_file: .env
     volumes:
-      - static:/static/
+      - static:/app/static_django/
       - media:/app/media/
     depends_on:
-      - foodgram_db
+      - db
   frontend:
     image: zinvas/foodgram_frontend
-    env_file: .env
     volumes:
-      - static_frontend:/static_frontend/
-    depends_on:
-      - backend
+      - static_frontend:/app/result_build/
   nginx:
     image: zinvas/foodgram_gateway
     env_file: .env
     ports:
       - 5000:80
     volumes:
-      - static:/static/
-      - media:/app/media/
+      - static:/static_django/
+      - media:/media/
       - static_frontend:/static_frontend/
     depends_on:
       - backend
-      - frontend
