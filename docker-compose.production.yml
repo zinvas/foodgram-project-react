@@ -3,35 +3,44 @@ version: '3'
 volumes:
   pg_data:
   static:
-  static_frontend:
   media:
 
 services:
   foodgram_db:
-    image: postgres:13
+    image: postgres:13.10
     env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
+    restart: always
+
   backend:
     image: zinvas/foodgram_backend
     env_file: .env
     volumes:
-      - static:/app/static_django/
+      - static:/static/
       - media:/app/media/
     depends_on:
       - foodgram_db
+    restart: on-failure
+
   frontend:
     image: zinvas/foodgram_frontend
+    env_file: .env
+    command: cp -r /app/build/. /static/
     volumes:
-      - static_frontend:/app/result_build/
-  nginx:
+      - static:/static
+    depends_on:
+      - backend
+    restart: no
+
+  gateway:
     image: zinvas/foodgram_gateway
     env_file: .env
     ports:
-      - 5000:80
+      - 9000:80
     volumes:
-      - static:/static_django/
-      - media:/media/
-      - static_frontend:/static_frontend/
+      - static:/static
+      - media:/media
     depends_on:
       - backend
+    restart: always
