@@ -44,27 +44,31 @@ from users.models import Subscribe
 User = get_user_model()
 
 
-def shoppingcart_download(request):
-    ingredients = IngredientsRecipes.objects.filter(
-        recipe__carts__user=request.user
-    ).values(
-        'ingredient__name',
-        'ingredient__measurement_unit'
-    ).annotate(amount_of_ingredient=Sum('amount'))
-    shopping_list = 'Your personal shopping list:'
-    for ingredient in ingredients:
-        shopping_list += (
-            f'\n{ingredient["ingredient__name"]} - '
-            f'{ingredient["amount_of_ingredient"]} '
-            f'{ingredient["ingredient__measurement_unit"]}'
-        )
-    today = timezone.now()
-    filename = f'{today:%Y-%m-%d}_shopping_list.txt'
-    response = HttpResponse(
-        shopping_list, content_type='text.txt: charset=utf-8'
+class ShoppingCartMixin():
+    @action(
+        methods=['get'],
+        detail=False,
+        permission_classes=(IsAuthenticated,)
     )
-    response['Content-Disposition'] = f'attachment; filename={filename}'
-    return response
+    def download_shopping_cart(self, request):
+        ingredients = IngredientsRecipes.objects.filter(
+            recipe__carts__user=request.user
+        ).values(
+            'ingredient__name',
+            'ingredient__measurement_unit'
+        ).annotate(amount_of_ingredient=Sum('amount'))
+        shopping_list = 'Your personal shopping list:'
+        for ingredient in ingredients:
+            shopping_list += (f'\n{ingredient["ingredient__name"]} - '
+                              f'{ingredient["amount_of_ingredient"]} '
+                              f'{ingredient["ingredient__measurement_unit"]}')
+        today = timezone.now()
+        filename = f'{today:%Y-%m-%d}_shopping_list.txt'
+        response = HttpResponse(
+            shopping_list, content_type='text.txt: charset=utf-8'
+        )
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+        return response
 
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -134,7 +138,7 @@ class UserViewSet(DjoserUserViewSet):
         return self.get_paginated_response(serializer.data)
 
 
-class RecipesViewSet(viewsets.ModelViewSet):
+class RecipesViewSet(ShoppingCartMixin, viewsets.ModelViewSet):
     queryset = Recipes.objects.prefetch_related('author', 'ingredients')
     permission_classes = (IsAdminAuthorOrReadOnly,)
     pagination_class = CustomPagination
@@ -199,11 +203,3 @@ class RecipesViewSet(viewsets.ModelViewSet):
         if request.method == 'POST':
             return self.add_recipe(Carts, request.user, pk)
         return self.delete_recipe(Carts, request.user, pk)
-
-    @action(
-        methods=['get'],
-        detail=False,
-        permission_classes=(IsAuthenticated,)
-    )
-    def download_shopping_cart(self, request):
-        shoppingcart_download(request)
