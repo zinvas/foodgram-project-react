@@ -1,5 +1,6 @@
 import base64
 from django.contrib.auth import get_user_model
+from django.db.transaction import atomic
 from djoser.serializers import (
     UserCreateSerializer as DjoserUserCreateSerializer,
     UserSerializer as DjoserUserSerializer
@@ -267,6 +268,7 @@ class RecipeAddSerializer(ModelSerializer):
         ) for ingredient in ingredients]
         IngredientsRecipes.objects.bulk_create(all_ingredients)
 
+    @atomic
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
@@ -278,6 +280,7 @@ class RecipeAddSerializer(ModelSerializer):
         )
         return recipe
 
+    @atomic
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
