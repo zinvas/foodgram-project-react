@@ -21,7 +21,7 @@ from food_api.permissions import IsAdminAuthorOrReadOnly
 from food_api.serializers import (
     IngredientSerializer,
     TagSerializer,
-    CustomUserSerializer,
+    UserSerializer,
     SubscribeSerializer,
     RecipeSerializer,
     RecipeAddSerializer,
@@ -60,7 +60,7 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
 
 class CustomUserViewSet(UserViewSet):
     queryset = User.objects.all()
-    serializer_class = CustomUserSerializer
+    serializer_class = UserSerializer
     pagination_class = CustomPagination
     permission_classes = (AllowAny,)
 

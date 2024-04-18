@@ -1,7 +1,10 @@
 import base64
 from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
-from djoser.serializers import UserCreateSerializer, UserSerializer
+from djoser.serializers import (
+    UserCreateSerializer as DjoserUserCreateSerializer,
+    UserSerializer as DjoserUserSerializer
+)
 from rest_framework.fields import (
     ImageField,
     IntegerField,
@@ -39,7 +42,7 @@ class TagSerializer(ModelSerializer):
         fields = ['id', 'name', 'color', 'slug']
 
 
-class CustomUserCreateSerializer(UserCreateSerializer):
+class UserCreateSerializer(DjoserUserCreateSerializer):
     first_name = CharField(required=True, max_length=150)
     last_name = CharField(required=True, max_length=150)
 
@@ -55,7 +58,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         ]
 
 
-class CustomUserSerializer(UserSerializer):
+class UserSerializer(DjoserUserSerializer):
     is_subscribed = SerializerMethodField(read_only=True)
 
     class Meta:
@@ -76,7 +79,7 @@ class CustomUserSerializer(UserSerializer):
         return Subscribe.objects.filter(user=user, author=author).exists()
 
 
-class SubscribeSerializer(CustomUserSerializer):
+class SubscribeSerializer(UserSerializer):
     recipes = SerializerMethodField(read_only=True)
     recipes_count = SerializerMethodField(read_only=True)
 
@@ -169,7 +172,7 @@ class Base64ImageField(ImageField):
 
 class RecipeSerializer(ModelSerializer):
     tags = TagSerializer(read_only=True, many=True)
-    author = CustomUserSerializer(read_only=True)
+    author = UserSerializer(read_only=True)
     ingredients = IngredientsRecipesSerializer(
         many=True,
         source='ingredientsrecipes'
@@ -212,7 +215,7 @@ class RecipeAddSerializer(ModelSerializer):
         many=True,
         queryset=Tags.objects.all()
     )
-    author = CustomUserSerializer(read_only=True)
+    author = UserSerializer(read_only=True)
     ingredients = IngredientsRecipesAddSerializer(many=True)
     image = Base64ImageField()
 
