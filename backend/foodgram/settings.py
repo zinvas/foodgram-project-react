@@ -14,7 +14,7 @@ SECRET_KEY = os.getenv('SECRET_KEY_VALUE', 'puk')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG_VALUE') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split('_')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(' ')
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -157,4 +157,4 @@ DJOSER = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-CSRF_TRUSTED_ORIGINS = ['https://foodgram.crabdance.com']
+CSRF_TRUSTED_ORIGINS = [os.getenv('CSRF_TRUSTED', 'puk')]
