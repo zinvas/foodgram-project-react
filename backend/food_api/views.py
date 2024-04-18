@@ -112,7 +112,7 @@ class UserViewSet(DjoserUserViewSet):
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
-    queryset = Recipes.objects.all()
+    queryset = Recipes.objects.select_related('author', 'ingredients')
     permission_classes = (IsAdminAuthorOrReadOnly,)
     pagination_class = CustomPagination
     filter_backends = (DjangoFilterBackend,)
