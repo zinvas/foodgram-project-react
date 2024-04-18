@@ -44,6 +44,29 @@ from users.models import Subscribe
 User = get_user_model()
 
 
+def shoppingcart_download(request):
+    ingredients = IngredientsRecipes.objects.filter(
+        recipe__carts__user=request.user
+    ).values(
+        'ingredient__name',
+        'ingredient__measurement_unit'
+    ).annotate(amount_of_ingredient=Sum('amount'))
+    shopping_list = 'Your personal shopping list:'
+    for ingredient in ingredients:
+        shopping_list += (
+            f'\n{ingredient["ingredient__name"]} - '
+            f'{ingredient["amount_of_ingredient"]} '
+            f'{ingredient["ingredient__measurement_unit"]}'
+        )
+    today = timezone.now()
+    filename = f'{today:%Y-%m-%d}_shopping_list.txt'
+    response = HttpResponse(
+        shopping_list, content_type='text.txt: charset=utf-8'
+    )
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+    return response
+
+
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tags.objects.all()
     serializer_class = TagSerializer
@@ -183,21 +206,4 @@ class RecipesViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def download_shopping_cart(self, request):
-        ingredients = IngredientsRecipes.objects.filter(
-            recipe__carts__user=request.user
-        ).values(
-            'ingredient__name',
-            'ingredient__measurement_unit'
-        ).annotate(amount_of_ingredient=Sum('amount'))
-        shopping_list = 'Your personal shopping list:'
-        for ingredient in ingredients:
-            shopping_list += (f'\n{ingredient["ingredient__name"]} - '
-                              f'{ingredient["amount_of_ingredient"]} '
-                              f'{ingredient["ingredient__measurement_unit"]}')
-        today = timezone.now()
-        filename = f'{today:%Y-%m-%d}_shopping_list.txt'
-        response = HttpResponse(
-            shopping_list, content_type='text.txt: charset=utf-8'
-        )
-        response['Content-Disposition'] = f'attachment; filename={filename}'
-        return response
+        shoppingcart_download(request)
