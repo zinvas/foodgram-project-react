@@ -279,14 +279,6 @@ class RecipeAddSerializer(ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        if not validated_data.get('tags'):
-            raise ValidationError({
-                'tags': 'Recipe needs to have at least one tag!'
-            })
-        if not validated_data.get('ingredients'):
-            raise ValidationError({
-                'ingredients': 'Recipe needs to have at least one ingredient!'
-            })
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         instance.tags.set(tags)
