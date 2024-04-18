@@ -143,9 +143,9 @@ REST_FRAMEWORK = {
 
 DJOSER = {
     'SERIALIZERS': {
-        'user_create': 'food_api.serializers.CustomUserCreateSerializer',
-        'user': 'food_api.serializers.CustomUserSerializer',
-        'current_user': 'food_api.serializers.CustomUserSerializer',
+        'user_create': 'food_api.serializers.UserCreateSerializer',
+        'user': 'food_api.serializers.UserSerializer',
+        'current_user': 'food_api.serializers.UserSerializer',
     },
     'PERMISSIONS': {
         'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
