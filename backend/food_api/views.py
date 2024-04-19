@@ -18,7 +18,7 @@ from rest_framework.status import (
 import tempfile
 
 from food_api.pagination import CustomPagination
-from food_api.permissions import IsAdminAuthorOrReadOnly
+from food_api.permissions import IsAuthorOrReadOnly
 from food_api.serializers import (
     IngredientSerializer,
     TagSerializer,
@@ -152,7 +152,7 @@ class UserViewSet(DjoserUserViewSet):
 
 class RecipesViewSet(ShoppingCartMixin, viewsets.ModelViewSet):
     queryset = Recipes.objects.prefetch_related('author', 'ingredients')
-    permission_classes = (IsAdminAuthorOrReadOnly,)
+    permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = CustomPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
