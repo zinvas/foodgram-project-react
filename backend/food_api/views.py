@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
-from django.http import HttpResponse
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from djoser.views import UserViewSet as DjoserUserViewSet
@@ -15,6 +15,7 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND
 )
+import tempfile
 
 from food_api.pagination import CustomPagination
 from food_api.permissions import IsAdminAuthorOrReadOnly
@@ -57,17 +58,25 @@ class ShoppingCartMixin():
             'ingredient__name',
             'ingredient__measurement_unit'
         ).annotate(amount_of_ingredient=Sum('amount'))
-        shopping_list = 'Your personal shopping list:'
-        for ingredient in ingredients:
-            shopping_list += (f'\n{ingredient["ingredient__name"]} - '
-                              f'{ingredient["amount_of_ingredient"]} '
-                              f'{ingredient["ingredient__measurement_unit"]}')
         today = timezone.now()
         filename = f'{today:%Y-%m-%d}_shopping_list.txt'
-        response = HttpResponse(
-            shopping_list, content_type='text.txt: charset=utf-8'
+        shopping_list = 'Your personal shopping list:'
+        temporary = tempfile.NamedTemporaryFile()
+        with open(temporary.name, 'w') as file:
+            file.write(shopping_list)
+            for ingredient in ingredients:
+                file.write(
+                    f'\n{ingredient["ingredient__name"]} - '
+                    f'{ingredient["amount_of_ingredient"]} '
+                    f'{ingredient["ingredient__measurement_unit"]}'
+                )
+        file = open(temporary.name, 'rb')
+        response = FileResponse(
+            file,
+            filename=filename,
+            as_attachment=True,
+            content_type='text/plain'
         )
-        response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
 
 
