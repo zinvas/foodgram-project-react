@@ -7,7 +7,7 @@ from django.utils import timezone
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS, AllowAny
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_201_CREATED,
@@ -18,7 +18,7 @@ from rest_framework.status import (
 import tempfile
 
 from food_api.pagination import CustomPagination
-from food_api.permissions import IsAuthorOrReadOnly
+from food_api.permissions import IsAdminAuthorOrReadOnly
 from food_api.serializers import (
     IngredientSerializer,
     TagSerializer,
@@ -96,6 +96,7 @@ class UserViewSet(DjoserUserViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = CustomPagination
+    permission_classes = (AllowAny,)
 
     def get_permissions(self):
         if self.action == 'me':
@@ -151,7 +152,7 @@ class UserViewSet(DjoserUserViewSet):
 
 class RecipesViewSet(ShoppingCartMixin, viewsets.ModelViewSet):
     queryset = Recipes.objects.prefetch_related('author', 'ingredients')
-    permission_classes = (IsAuthorOrReadOnly,)
+    permission_classes = (IsAdminAuthorOrReadOnly,)
     pagination_class = CustomPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
