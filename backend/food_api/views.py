@@ -7,7 +7,7 @@ from django.utils import timezone
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, SAFE_METHODS, AllowAny
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_201_CREATED,
@@ -96,7 +96,6 @@ class UserViewSet(DjoserUserViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = CustomPagination
-    permission_classes = (AllowAny,)
 
     def get_permissions(self):
         if self.action == 'me':
