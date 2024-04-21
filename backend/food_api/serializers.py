@@ -195,9 +195,9 @@ class RecipeSerializer(ModelSerializer):
             user=user,
             recipe=OuterRef('pk')
         )
-        return obj.objects.annotate(
+        return Recipes.objects.annotate(
             is_favorited=Exists(subquery)
-        ).values('is_favorited').first()['is_favorited']
+        ).get(pk=obj.pk).is_favorited
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user
@@ -207,9 +207,9 @@ class RecipeSerializer(ModelSerializer):
             user=user,
             recipe=OuterRef('pk')
         )
-        return obj.objects.annotate(
+        return Recipes.objects.annotate(
             is_in_shopping_cart=Exists(subquery)
-        ).values('is_in_shopping_cart').first()['is_in_shopping_cart']
+        ).get(pk=obj.pk).is_in_shopping_cart
 
 
 class RecipeAddSerializer(ModelSerializer):
