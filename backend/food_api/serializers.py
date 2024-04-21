@@ -168,8 +168,6 @@ class RecipeSerializer(ModelSerializer):
         source='ingredientsrecipes'
     )
     image = Base64ImageField(required=False)
-    is_favorited = SerializerMethodField(read_only=True)
-    is_in_shopping_cart = SerializerMethodField(read_only=True)
     cooking_time = IntegerField(min_value=1)
 
     class Meta:
@@ -187,29 +185,20 @@ class RecipeSerializer(ModelSerializer):
             'cooking_time'
         ]
 
-    def get_is_favorited(self, obj):
-        user = self.context.get('request').user
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        user = self.context['request'].user
         if user.is_anonymous:
-            return False
-        subquery = Favorites.objects.filter(
-            user=user,
-            recipe=OuterRef('pk')
-        )
-        return Recipes.objects.annotate(
-            is_favorited=Exists(subquery)
-        ).get(pk=obj.pk).is_favorited
-
-    def get_is_in_shopping_cart(self, obj):
-        user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
-        subquery = Carts.objects.filter(
-            user=user,
-            recipe=OuterRef('pk')
-        )
-        return Recipes.objects.annotate(
-            is_in_shopping_cart=Exists(subquery)
-        ).get(pk=obj.pk).is_in_shopping_cart
+            representation['is_favorited'] = False
+            representation['is_in_shopping_cart'] = False
+        else:
+            representation['is_favorited'] = Exists(
+                Favorites.objects.filter(user=user, recipe=OuterRef('pk'))
+            )
+            representation['is_in_shopping_cart'] = Exists(
+                Carts.objects.filter(user=user, recipe=OuterRef('pk'))
+            )
+        return representation
 
 
 class RecipeAddSerializer(ModelSerializer):
