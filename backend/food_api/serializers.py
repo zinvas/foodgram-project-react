@@ -1,5 +1,6 @@
 import base64
 from django.contrib.auth import get_user_model
+from django.db.models import Exists, OuterRef
 from django.db.transaction import atomic
 from djoser.serializers import (
     UserCreateSerializer as DjoserUserCreateSerializer,
@@ -190,13 +191,25 @@ class RecipeSerializer(ModelSerializer):
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
-        return Favorites.objects.filter(user=user, recipe=obj).exists()
+        subquery = Favorites.objects.filter(
+            user=user,
+            recipe=OuterRef('pk')
+        )
+        return obj.objects.annotate(
+            is_favorited=Exists(subquery)
+        ).values('is_favorited').first()['is_favorited']
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
-        return Carts.objects.filter(user=user, recipe=obj).exists()
+        subquery = Carts.objects.filter(
+            user=user,
+            recipe=OuterRef('pk')
+        )
+        return obj.objects.annotate(
+            is_in_shopping_cart=Exists(subquery)
+        ).values('is_in_shopping_cart').first()['is_in_shopping_cart']
 
 
 class RecipeAddSerializer(ModelSerializer):
