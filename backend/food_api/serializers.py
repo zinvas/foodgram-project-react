@@ -261,12 +261,11 @@ class RecipeAddSerializer(ModelSerializer):
                 raise ValidationError({
                     'amount': 'Ingredient amount has to be greater than 0!'
                 })
-        for ingredient in value:
-            if not Ingredients.objects.filter(id=ingredient['id']).exists():
-                raise ValidationError(
-                    {'ingredients': 'Ingredient doesn\'t exist!'}
-                )
-        ingredients = {ingredient['id'] for ingredient in value}
+        ingredients = list({ingredient['id'] for ingredient in value})
+        if not Ingredients.objects.filter(id__in=ingredients).exists():
+            raise ValidationError({
+                'ingredients': 'One or more ingredients do not exist!'
+            })
         if len(value) != len(ingredients):
             raise ValidationError(
                 {'ingredients': 'Can\'t add repetative ingredients'}
