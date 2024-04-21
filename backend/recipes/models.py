@@ -68,7 +68,7 @@ class Ingredients(models.Model):
     measurement_unit = models.CharField('Ед. измерения', max_length=200)
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['name']
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
 
