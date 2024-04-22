@@ -97,6 +97,11 @@ class UserViewSet(DjoserUserViewSet):
     serializer_class = UserSerializer
     pagination_class = PageSizePagination
 
+    def get_permissions(self):
+        if self.action == 'me':
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
+
     @action(
         detail=True,
         methods=['post'],
