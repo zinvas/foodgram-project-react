@@ -197,20 +197,24 @@ class RecipesViewSet(ShoppingCartMixin, viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['post', 'delete'],
+        methods=['post'],
         permission_classes=(IsAuthenticated,)
     )
     def favorite(self, request, pk):
-        if request.method == 'POST':
-            return self.add_recipe(Favorites, request.user, pk)
+        return self.add_recipe(Favorites, request.user, pk)
+
+    @favorite.mapping.delete
+    def del_favorite(self, request, pk):
         return self.delete_recipe(Favorites, request.user, pk)
 
     @action(
         detail=True,
-        methods=['post', 'delete'],
+        methods=['post'],
         permission_classes=(IsAuthenticated,)
     )
     def shopping_cart(self, request, pk):
-        if request.method == 'POST':
-            return self.add_recipe(Carts, request.user, pk)
+        return self.add_recipe(Carts, request.user, pk)
+
+    @shopping_cart.mapping.delete
+    def del_shopping_cart(self, request, pk):
         return self.delete_recipe(Carts, request.user, pk)
