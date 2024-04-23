@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Sum, Exists, OuterRef
+from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
@@ -150,34 +150,15 @@ class UserViewSet(DjoserUserViewSet):
 
 
 class RecipesViewSet(ShoppingCartMixin, viewsets.ModelViewSet):
+    queryset = Recipes.objects.select_related(
+        'author'
+    ).prefetch_related(
+        'ingredients'
+    )
     permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = PageSizePagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-
-    def get_queryset(self):
-        queryset = Recipes.objects.select_related('author').prefetch_related(
-            'ingredients',
-            'tags'
-        )
-        if not self.request.user.is_authenticated:
-            return queryset
-        return (
-            queryset.annotate(
-                is_favorited=Exists(
-                    Favorites.objects.filter(
-                        recipe=OuterRef('id'),
-                        user=self.request.user
-                    )
-                ),
-                is_in_shopping_cart=Exists(
-                    Carts.objects.filter(
-                        recipe=OuterRef('id'),
-                        user=self.request.user
-                    )
-                )
-            )
-        )
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:

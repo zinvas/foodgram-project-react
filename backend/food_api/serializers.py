@@ -1,5 +1,6 @@
 import base64
 from django.contrib.auth import get_user_model
+from django.db.models import Exists, OuterRef
 from django.db.transaction import atomic
 from djoser.serializers import (
     UserCreateSerializer as DjoserUserCreateSerializer,
@@ -9,8 +10,7 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework.fields import (
     IntegerField,
     SerializerMethodField,
-    CharField,
-    ReadOnlyField
+    CharField
 )
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer
@@ -21,7 +21,9 @@ from recipes.models import (
     Recipes,
     Tags,
     Ingredients,
-    IngredientsRecipes
+    IngredientsRecipes,
+    Favorites,
+    Carts
 )
 from users.models import Subscribe
 
@@ -166,8 +168,8 @@ class RecipeSerializer(ModelSerializer):
         source='ingredientsrecipes'
     )
     image = Base64ImageField(required=False)
-    is_favorited = ReadOnlyField(default=False)
-    is_in_shopping_cart = ReadOnlyField(default=False)
+    is_favorited = SerializerMethodField(read_only=True)
+    is_in_shopping_cart = SerializerMethodField(read_only=True)
     cooking_time = IntegerField(min_value=1)
 
     class Meta:
@@ -184,6 +186,30 @@ class RecipeSerializer(ModelSerializer):
             'image',
             'cooking_time'
         ]
+
+    def get_is_favorited(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        subquery = Favorites.objects.filter(
+            user=user,
+            recipe=OuterRef('pk')
+        )
+        return Recipes.objects.annotate(
+            is_favorited=Exists(subquery)
+        ).get(pk=obj.pk).is_favorited
+
+    def get_is_in_shopping_cart(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        subquery = Carts.objects.filter(
+            user=user,
+            recipe=OuterRef('pk')
+        )
+        return Recipes.objects.annotate(
+            is_in_shopping_cart=Exists(subquery)
+        ).get(pk=obj.pk).is_in_shopping_cart
 
 
 class RecipeAddSerializer(ModelSerializer):
