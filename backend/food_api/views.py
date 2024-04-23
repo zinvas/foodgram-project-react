@@ -162,7 +162,7 @@ class RecipesViewSet(ShoppingCartMixin, viewsets.ModelViewSet):
             'ingredients'
         )
         if not self.request.user.is_authenticated:
-            return queryset.all()
+            return queryset
         return (
             queryset.annotate(
                 is_favorited=Exists(
@@ -177,7 +177,7 @@ class RecipesViewSet(ShoppingCartMixin, viewsets.ModelViewSet):
                         user=self.request.user
                     )
                 )
-            ).all()
+            )
         )
 
     def get_serializer_class(self):
