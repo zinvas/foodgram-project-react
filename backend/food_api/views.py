@@ -1,11 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import (
-    Sum,
-    Prefetch,
-    F,
-    Exists,
-    OuterRef
-)
+from django.db.models import (Sum, Prefetch)
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
@@ -160,19 +154,6 @@ class RecipesViewSet(ShoppingCartMixin, viewsets.ModelViewSet):
         Prefetch(
             'ingredients',
             queryset=IngredientsRecipes.objects.select_related('ingredient')
-        )
-    ).annotate(
-        is_favorited=Exists(
-            Favorites.objects.filter(
-                recipe_id=OuterRef('id'),
-                user_id=F('author_id')
-            )
-        ),
-        is_in_shopping_cart=Exists(
-            Carts.objects.filter(
-                recipe_id=OuterRef('id'),
-                user_id=F('author_id')
-            )
         )
     )
     permission_classes = (IsAuthorOrReadOnly,)
