@@ -10,7 +10,7 @@ from rest_framework.fields import (
     IntegerField,
     SerializerMethodField,
     CharField,
-    BooleanField
+    ReadOnlyField
 )
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer
@@ -166,8 +166,8 @@ class RecipeSerializer(ModelSerializer):
         source='ingredientsrecipes'
     )
     image = Base64ImageField(required=False)
-    is_favorited = BooleanField(read_only=True)
-    is_in_shopping_cart = BooleanField(read_only=True)
+    is_favorited = ReadOnlyField(default=False)
+    is_in_shopping_cart = ReadOnlyField(default=False)
     cooking_time = IntegerField(min_value=1)
 
     class Meta:
