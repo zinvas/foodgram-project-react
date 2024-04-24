@@ -208,7 +208,7 @@ class RecipesViewSet(ShoppingCartMixin, viewsets.ModelViewSet):
                 {'error': 'Recipe doesn\'t exist!'},
                 status=HTTP_404_NOT_FOUND
             )
-        del_count, _ = model.objects.filter(user=user, recipe__id=id).delete
+        del_count, _ = model.objects.filter(user=user, recipe__id=id).delete()
         if del_count:
             return Response(status=HTTP_204_NO_CONTENT)
         return Response(
