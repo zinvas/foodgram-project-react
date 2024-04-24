@@ -45,7 +45,7 @@ from users.models import Subscribe
 User = get_user_model()
 
 
-class ShoppingCartMixin():
+class ShoppingCartMixin:
     @action(
         methods=['get'],
         detail=False,
