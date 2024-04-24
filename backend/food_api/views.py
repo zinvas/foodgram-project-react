@@ -123,15 +123,13 @@ class UserViewSet(DjoserUserViewSet):
     def unsubscribe(self, request, **kwargs):
         user = request.user
         author = get_object_or_404(User, id=self.kwargs.get('id'))
-        if not Subscribe.objects.filter(user=user, author=author).exists():
-            return Response(status=HTTP_400_BAD_REQUEST)
-        subscription = get_object_or_404(
-            Subscribe,
+        del_count, _ = Subscribe.objects.filter(
             user=user,
             author=author
-        )
-        subscription.delete()
-        return Response(status=HTTP_204_NO_CONTENT)
+        ).delete()
+        if del_count:
+            return Response(status=HTTP_204_NO_CONTENT)
+        return Response(status=HTTP_400_BAD_REQUEST)
 
     @action(
         detail=False,
